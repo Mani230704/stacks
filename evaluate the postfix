@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <ctype.h> 
+
+#define MAX_SIZE 100
+typedef struct {
+    int data[MAX_SIZE];
+    int top;
+} Stack;
+void initialize(Stack *stack) {
+    stack->top = -1;
+}
+bool isEmpty(Stack *stack) {
+    return stack->top == -1;
+}
+
+void push(Stack *stack, int value) {
+    if (stack->top < MAX_SIZE - 1) {
+        stack->data[++stack->top] = value;
+    }
+}
+int pop(Stack *stack) {
+    if (!isEmpty(stack)) {
+        return stack->data[stack->top--];
+    }
+    return INT_MIN;
+}
+int evaluatePostfix(char *postfix) {
+    Stack stack;
+    initialize(&stack);
+    int i;
+    
+    for (i = 0; postfix[i] != '\0'; ++i) {
+        char c = postfix[i];
+        
+        if (isdigit(c)) {
+            push(&stack, c - '0'); // Convert char to int
+        } else {
+            int operand2 = pop(&stack);
+            int operand1 = pop(&stack);
+            
+            switch (c) {
+                case '+':
+                    push(&stack, operand1 + operand2);
+                    break;
+                case '-':
+                    push(&stack, operand1 - operand2);
+                    break;
+                case '*':
+                    push(&stack, operand1 * operand2);
+                    break;
+                case '/':
+                    push(&stack, operand1 / operand2);
+                    break;
+            }
+        }
+    }
+    
+    return pop(&stack);
+}
+
+int main() {
+    char postfix[MAX_SIZE];
+
+    printf("Enter a postfix expression: ");
+    scanf("%s", postfix);
+
+    int result = evaluatePostfix(postfix);
+
+    printf("Result: %d\n", result);
+
+    return 0;
