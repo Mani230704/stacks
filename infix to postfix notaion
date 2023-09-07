@@ -1,0 +1,86 @@
+#include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <stdbool.h>
+
+  #define MAX_SIZE 100
+typedef struct {
+    char data[MAX_SIZE];
+    int top;
+} Stack;
+void initialize(Stack *stack) {
+    stack->top = -1;
+}
+bool isEmpty(Stack *stack) {
+    return stack->top == -1;
+}
+
+void push(Stack *stack, char value) {
+    if (stack->top < MAX_SIZE - 1) {
+        stack->data[++stack->top] = value;
+    }
+}
+char pop(Stack *stack) {
+    if (!isEmpty(stack)) {
+        return stack->data[stack->top--];
+    }
+    return '\0'; // Empty stack marker
+}
+int getPrecedence(char operator) {
+    switch (operator) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        case '^':
+            return 3;
+    }
+    return 0;
+}
+void infixToPostfix(char *infix, char *postfix) {
+    Stack stack;
+    initialize(&stack);
+    int i, j;
+    
+    for (i = 0, j = 0; infix[i] != '\0'; ++i) {
+        char c = infix[i];
+        
+        if (isalnum(c)) {
+            postfix[j++] = c;
+        } else if (c == '(') {
+            push(&stack, c);
+        } else if (c == ')') {
+            while (!isEmpty(&stack) && stack.data[stack.top] != '(') {
+                postfix[j++] = pop(&stack);
+            }
+            pop(&stack);
+        } else {
+            while (!isEmpty(&stack) && getPrecedence(c) <= getPrecedence(stack.data[stack.top])) {
+                postfix[j++] = pop(&stack);
+            }
+            push(&stack, c);
+        }
+    }
+    
+    while (!isEmpty(&stack)) {
+        postfix[j++] = pop(&stack);
+    }
+    
+    postfix[j] = '\0';
+}
+
+int main() {
+    char infix[MAX_SIZE];
+    char postfix[MAX_SIZE];
+
+    printf("Enter an infix expression: ");
+    scanf("%s", infix);
+
+    infixToPostfix(infix, postfix);
+
+    printf("Postfix expression: %s\n", postfix);
+
+    return 0;
+}
